@@ -23,6 +23,50 @@ jobs:
         with:
           repository: zyronon/TypeWords
 
+      - name: Checkout custom dicts
+        uses: actions/checkout@v4
+        with:
+          repository: TZ-yzz/typewords
+          path: custom
+
+      - name: Add custom dicts
+        run: |
+          cp custom/dicts/XH_CET4.json public/dicts/en/word/XH_CET4.json
+          python3 - <<'PY'
+          import json
+          words = json.load(open('public/dicts/en/word/XH_CET4.json'))
+          entry = {
+              "id": 2,
+              "enName": "xh_cet4",
+              "name": "星火四级高频词汇",
+              "description": "星火英语四级高频词汇（必背乱序版）",
+              "categoryId": 1,
+              "url": "XH_CET4.json",
+              "length": len(words),
+              "language": "en",
+              "translateLanguage": "zh_CN",
+              "version": 1,
+              "type": "word",
+              "isDefault": False,
+              "recommended": True,
+              "userId": "00000000-0000-0000-0000-000000000001",
+              "createdAt": "2026-11-05 00:00:00",
+              "updatedAt": "2026-11-05 00:00:00",
+              "cover": None,
+              "hidden": False,
+              "category": "中国考试",
+              "tags": ["大学英语"]
+          }
+          for path in ['public/list/word.json', 'public/list/recommend_word.json']:
+              with open(path) as f:
+                  lst = json.load(f)
+              lst = [e for e in lst if e.get("enName") != "xh_cet4"]
+              lst.append(entry)
+              with open(path, 'w') as f:
+                  json.dump(lst, f, ensure_ascii=False)
+          print("added", entry["name"], "length", len(words))
+          PY
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
